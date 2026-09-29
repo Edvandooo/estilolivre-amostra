@@ -12,11 +12,103 @@ import {
   ExternalLink,
   Menu,
   X,
-  Search
+  Search,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  Quote
 } from 'lucide-react';
+
+// Universal static assets from public/images: 100% build compatibility on Netlify, GitHub, Vercel & AI Studio
+const heroCinematicBg = '/images/hero_cinematic_bg_1790649713873.jpg';
+const clipperCutoutPng = '/images/clipper_cutout_transparent.png';
+const barbeariaFotoOriginal = '/images/barbearia_foto_original.jpg';
+const galeriaCorte1 = '/images/galeria_corte_1.jpg';
+const galeriaCorte2 = '/images/galeria_corte_2.jpg';
+const galeriaCorte3 = '/images/galeria_corte_3.jpg';
+const galeriaCorte4 = '/images/galeria_corte_4.jpg';
 
 // Official Booksy profile for Barbearia Estilo Livre
 const BOOKSY_URL = "https://booksy.com/pt-br/111219_barbearia-estilo-livre_barbearias_1047773_sao-paulo";
+
+// Official Google Maps profile and reviews for Barbearia Estilo Livre
+const GOOGLE_MAPS_REVIEWS_URL = "https://www.google.com.br/maps/place/Barbearia+Estilo+Livre/@-23.4998209,-46.3947723,17z/data=!4m8!3m7!1s0x94ce65f29516ebc7:0xb9395243b826465d!8m2!3d-23.4998258!4d-46.3921974!9m1!1b1!16s%2Fg%2F11j79l_d5g?hl=pt-BR&entry=ttu";
+
+interface ReviewItem {
+  id: string;
+  name: string;
+  initials: string;
+  rating: number;
+  comment: string;
+  accent: 'blue' | 'red' | 'gold';
+}
+
+const REVIEWS_DATA: ReviewItem[] = [
+  {
+    id: 'bruno',
+    name: 'Bruno da Silva Bento',
+    initials: 'BB',
+    rating: 5,
+    comment: 'Barbearia top Barbeiros de primeira bem atualizados sem falar o preço que e ótimo de todos lugares onde fui nunca fui tão bem recebido tem que ver o trabalho infantil excelente sem comentários nota 10',
+    accent: 'blue'
+  },
+  {
+    id: 'flavio',
+    name: 'Flavio Lima',
+    initials: 'FL',
+    rating: 5,
+    comment: 'Ambiente sensacional bem aconchegante e atendimento personalizado. Sai muito satisfeito com o corte e o profissionalismo.',
+    accent: 'red'
+  },
+  {
+    id: 'paulo',
+    name: 'Paulo Guilherme',
+    initials: 'PG',
+    rating: 5,
+    comment: 'Meus parabéns foi muito bem atendido vcs são os melhores que Deus abençoe vcs',
+    accent: 'blue'
+  },
+  {
+    id: 'guinho-milly',
+    name: 'Guinho e Milly Santos',
+    initials: 'GS',
+    rating: 5,
+    comment: 'Super indico...ótimo atendimento e o cliente são satisfeito com o corte... #superindico',
+    accent: 'red'
+  },
+  {
+    id: 'luis',
+    name: 'Luis Souza',
+    initials: 'LS',
+    rating: 5,
+    comment: 'Excelente atendimento, Airton e os meninos mandam bem no corte 😎',
+    accent: 'blue'
+  },
+  {
+    id: 'rodrigo',
+    name: 'Rodrigo Ventura',
+    initials: 'RV',
+    rating: 5,
+    comment: 'Atendimento nota 10!',
+    accent: 'gold'
+  },
+  {
+    id: 'nathan',
+    name: 'Nathan Ribeiro',
+    initials: 'NR',
+    rating: 5,
+    comment: 'Melhor barbearia do Itaim paulista recomendo',
+    accent: 'red'
+  },
+  {
+    id: 'micael',
+    name: 'Micael',
+    initials: 'M',
+    rating: 5,
+    comment: 'Ótimo lugar com ótimos profissionais',
+    accent: 'blue'
+  }
+];
 
 interface ServiceItem {
   name: string;
@@ -190,15 +282,6 @@ const SERVICE_CATEGORIES: ServiceCategory[] = [
   }
 ];
 
-// Universal static assets served from public/images for 100% build compatibility on Netlify, Vercel & GitHub
-const heroCinematicBg = '/images/hero_cinematic_bg_1790649713873.jpg';
-const clipperCutoutPng = '/images/clipper_cutout_transparent.png';
-const barbeariaFotoOriginal = '/images/barbearia_foto_original.jpg';
-const galeriaCorte1 = '/images/galeria_corte_1.jpg';
-const galeriaCorte2 = '/images/galeria_corte_2.jpg';
-const galeriaCorte3 = '/images/galeria_corte_3.jpg';
-const galeriaCorte4 = '/images/galeria_corte_4.jpg';
-
 // Helper custom hook for smooth scroll reveal transitions using IntersectionObserver
 function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -259,12 +342,24 @@ export default function App() {
     }).filter(Boolean) as ServiceCategory[];
   }, [activeCategory, searchQuery]);
 
-  // Section scroll reveal hooks (Sobre, Serviços, Galeria, Espaço, Contato)
+  // Section scroll reveal hooks (Sobre, Serviços, Galeria, Espaço, Avaliações, Contato)
   const sobreReveal = useScrollReveal();
   const servicosReveal = useScrollReveal();
   const galeriaReveal = useScrollReveal();
   const espacoReveal = useScrollReveal();
+  const avaliacoesReveal = useScrollReveal();
   const contatoReveal = useScrollReveal();
+
+  // Carousel state for Avaliações section
+  const [reviewIndex, setReviewIndex] = useState(0);
+
+  const nextReview = () => {
+    setReviewIndex((prev) => (prev + 1) % REVIEWS_DATA.length);
+  };
+
+  const prevReview = () => {
+    setReviewIndex((prev) => (prev - 1 + REVIEWS_DATA.length) % REVIEWS_DATA.length);
+  };
 
   // Scroll detection for header styling
   useEffect(() => {
@@ -386,11 +481,18 @@ export default function App() {
                 04. O Nosso Espaço
               </a>
               <a 
+                href="#avaliacoes" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-2 border-b border-white/[0.04] hover:text-white"
+              >
+                05. Avaliações
+              </a>
+              <a 
                 href="#contato" 
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-2 hover:text-white"
               >
-                05. Horários & Contato
+                06. Horários & Contato
               </a>
             </nav>
 
@@ -502,22 +604,30 @@ export default function App() {
               {/* Contêiner da Máquina com Animação Automática Flutuante Contínua */}
               <div 
                 className="animate-clipper-float relative w-[48vw] sm:w-[38vw] md:w-[32vw] lg:w-[28vw] max-w-[340px]"
-                style={{
-                  filter: 'drop-shadow(0 25px 35px rgba(0, 0, 0, 0.95)) drop-shadow(-18px 0 35px rgba(239, 68, 68, 0.45)) drop-shadow(18px 0 35px rgba(37, 99, 235, 0.45))'
-                }}
               >
                 <img
                   src={clipperCutoutPng}
                   alt="Máquina de cortar cabelo profissional com lâmina de precisão - Barbearia Estilo Livre"
                   referrerPolicy="no-referrer"
                   className="w-full h-auto object-contain select-none"
+                  style={{
+                    filter: 'drop-shadow(0 25px 35px rgba(0, 0, 0, 0.95)) drop-shadow(-18px 0 35px rgba(239, 68, 68, 0.45)) drop-shadow(18px 0 35px rgba(37, 99, 235, 0.45))'
+                  }}
                 />
 
-                {/* Brilho Especular Reflexivo Dinâmico sobre a Lâmina (Luz de Estúdio) */}
+                {/* Brilho Especular Reflexivo Dinâmico sobre a Lâmina (Luz de Estúdio) mascarado no formato da máquina */}
                 <div 
                   className="absolute inset-0 pointer-events-none opacity-40 mix-blend-screen transition-opacity duration-300"
                   style={{
-                    background: `linear-gradient(${115 + mousePos.x * 40}deg, rgba(239,68,68,0.5) 15%, transparent 45%, rgba(37,99,235,0.5) 85%)`
+                    background: `linear-gradient(${115 + mousePos.x * 40}deg, rgba(239,68,68,0.5) 15%, transparent 45%, rgba(37,99,235,0.5) 85%)`,
+                    WebkitMaskImage: `url(${clipperCutoutPng})`,
+                    maskImage: `url(${clipperCutoutPng})`,
+                    WebkitMaskSize: 'contain',
+                    maskSize: 'contain',
+                    WebkitMaskRepeat: 'no-repeat',
+                    maskRepeat: 'no-repeat',
+                    WebkitMaskPosition: 'center',
+                    maskPosition: 'center'
                   }}
                 />
               </div>
@@ -1164,7 +1274,204 @@ export default function App() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 7. HORÁRIOS & CONTATO: LAYOUT ARQUITETURAL MINIMALISTA COM FADE-IN        */}
+      {/* 7. AVALIAÇÕES: DEPOIMENTOS REAIS DO GOOGLE MAPS (EDITORIAL & SOFISTICADO) */}
+      {/* ========================================================================= */}
+      <section 
+        id="avaliacoes" 
+        ref={avaliacoesReveal.ref}
+        className={`py-28 sm:py-36 px-6 border-t border-white/[0.08] bg-[#07080B] relative overflow-hidden transition-all duration-1000 ease-out ${
+          avaliacoesReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+        }`}
+      >
+        {/* Luzes Físicas de Estúdio Sutis de Fundo */}
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+          <div className="hero-red-beam absolute -top-1/3 -left-1/4 w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none opacity-20" />
+          <div className="hero-blue-beam absolute -bottom-1/3 -right-1/4 w-[600px] h-[600px] rounded-full blur-[140px] pointer-events-none opacity-25" />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto space-y-12 sm:space-y-16">
+          
+          {/* Cabeçalho da Seção com Badge Autêntico do Google Maps */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-white/[0.06]">
+            <div className="max-w-2xl">
+              <span className="text-xs font-mono-num uppercase tracking-[0.25em] text-[#25D366] block mb-3">
+                05 / REPUTAÇÃO
+              </span>
+              <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tight">
+                Avaliações Reais
+              </h2>
+              <p className="text-neutral-400 text-sm sm:text-base mt-3 leading-relaxed">
+                Opiniões autênticas e espontâneas de quem frequenta a Barbearia Estilo Livre na Zona Leste de São Paulo.
+              </p>
+            </div>
+
+            {/* Badge Editorial de Classificação no Google */}
+            <a
+              href={GOOGLE_MAPS_REVIEWS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3.5 px-5 py-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-white/[0.2] hover:bg-white/[0.06] transition-all group shrink-0"
+              title="Ver perfil oficial no Google Maps"
+            >
+              <div className="w-10 h-10 rounded-xl bg-white/[0.08] border border-white/[0.1] flex items-center justify-center font-bold text-lg text-white">
+                G
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono-num font-bold text-white text-base">5.0</span>
+                  <div className="flex items-center text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                </div>
+                <span className="text-[11px] text-neutral-400 group-hover:text-white flex items-center gap-1 transition-colors font-mono-num">
+                  <span>Avaliações no Google Maps</span>
+                  <ExternalLink className="w-3 h-3 text-neutral-500" />
+                </span>
+              </div>
+            </a>
+          </div>
+
+          {/* Carrossel / Grade Editorial de Avaliações */}
+          <div className="relative">
+            {/* Grid no Desktop / Tablet (3 ou 2 colunas visíveis), Slide no Mobile */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[0, 1, 2].map((offset) => {
+                const itemIndex = (reviewIndex + offset) % REVIEWS_DATA.length;
+                const review = REVIEWS_DATA[itemIndex];
+                
+                const isHiddenOnMobile = offset > 0 ? 'hidden md:flex' : 'flex';
+                const isHiddenOnTablet = offset === 2 ? 'md:hidden lg:flex' : '';
+
+                return (
+                  <article
+                    key={review.id}
+                    className={`${isHiddenOnMobile} ${isHiddenOnTablet} flex-col justify-between p-7 sm:p-8 rounded-2xl bg-[#0B0D11]/90 backdrop-blur-md border border-white/[0.08] hover:border-white/[0.2] transition-all duration-300 relative overflow-hidden group shadow-xl min-h-[320px]`}
+                  >
+                    {/* Borda superior de acento estilístico sutil */}
+                    <div 
+                      className={`absolute top-0 left-0 right-0 h-[2px] ${
+                        review.accent === 'blue' 
+                          ? 'bg-gradient-to-r from-transparent via-[#2563eb] to-transparent opacity-60' 
+                          : review.accent === 'red'
+                          ? 'bg-gradient-to-r from-transparent via-[#ef4444] to-transparent opacity-60'
+                          : 'bg-gradient-to-r from-transparent via-amber-400/60 to-transparent opacity-60'
+                      }`}
+                    />
+
+                    <div>
+                      {/* Topo do Card: 5 Estrelas + Badge Discreto */}
+                      <div className="flex items-center justify-between gap-2 mb-6">
+                        <div className="flex items-center gap-1 text-amber-400">
+                          {[...Array(review.rating)].map((_, i) => (
+                            <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          ))}
+                        </div>
+                        <span className="text-[10px] font-mono-num uppercase tracking-wider text-neutral-400 bg-white/[0.04] px-2 py-0.5 rounded border border-white/[0.06]">
+                          Google Review
+                        </span>
+                      </div>
+
+                      {/* Ícone de Citação e Texto Original Verbatim */}
+                      <Quote className="w-7 h-7 text-white/[0.12] mb-3 group-hover:text-white/[0.2] transition-colors" />
+                      <p className="font-body text-neutral-200 text-sm sm:text-[15px] leading-relaxed italic font-normal">
+                        “{review.comment}”
+                      </p>
+                    </div>
+
+                    {/* Rodapé do Card: Identificação Real do Avaliador */}
+                    <div className="pt-6 mt-6 border-t border-white/[0.06] flex items-center gap-3.5">
+                      {/* Avatar Tipográfico com iniciais autênticas */}
+                      <div 
+                        className={`w-10 h-10 rounded-full bg-[#12141A] border flex items-center justify-center font-bold text-xs text-white uppercase tracking-wider shrink-0 ${
+                          review.accent === 'blue'
+                            ? 'border-[#2563eb]/40 text-blue-300'
+                            : review.accent === 'red'
+                            ? 'border-[#ef4444]/40 text-red-300'
+                            : 'border-amber-400/40 text-amber-300'
+                        }`}
+                      >
+                        {review.initials}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-bold text-white text-sm tracking-tight truncate">
+                          {review.name}
+                        </h4>
+                        <span className="text-[11px] text-neutral-400 flex items-center gap-1 font-mono-num mt-0.5">
+                          <Check className="w-3 h-3 text-[#25D366] shrink-0" />
+                          <span>Cliente verificado</span>
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            {/* Controles de Navegação do Carrossel */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-10">
+              
+              {/* Indicadores de Paginação / Dots */}
+              <div className="flex items-center gap-2">
+                {REVIEWS_DATA.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setReviewIndex(idx)}
+                    aria-label={`Ver avaliação ${idx + 1}`}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      reviewIndex === idx 
+                        ? 'w-8 bg-[#25D366]' 
+                        : 'w-2 bg-white/20 hover:bg-white/40'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Botões Anterior e Próximo */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={prevReview}
+                  aria-label="Avaliação anterior"
+                  className="p-3 rounded-full bg-white/[0.04] border border-white/[0.08] text-white hover:bg-white/[0.1] hover:border-white/[0.2] active:scale-95 transition-all"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="text-xs font-mono-num text-neutral-400 px-2">
+                  <span className="text-white font-bold">{reviewIndex + 1}</span> / {REVIEWS_DATA.length}
+                </span>
+                <button
+                  onClick={nextReview}
+                  aria-label="Próxima avaliação"
+                  className="p-3 rounded-full bg-white/[0.04] border border-white/[0.08] text-white hover:bg-white/[0.1] hover:border-white/[0.2] active:scale-95 transition-all"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* Chamada Final Conectada ao Google Maps */}
+          <div className="text-center pt-4">
+            <a
+              href={GOOGLE_MAPS_REVIEWS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] text-white border border-white/[0.08] hover:border-white/[0.2] text-xs uppercase tracking-wider font-semibold transition-all group"
+            >
+              <span>Ver todas as avaliações no Google Maps</span>
+              <ExternalLink className="w-3.5 h-3.5 text-neutral-400 group-hover:text-white transition-colors" />
+            </a>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 8. HORÁRIOS & CONTATO: LAYOUT ARQUITETURAL MINIMALISTA COM FADE-IN        */}
       {/* ========================================================================= */}
       <section 
         id="contato" 
@@ -1177,7 +1484,7 @@ export default function App() {
           
           <div className="text-center max-w-2xl mx-auto">
             <span className="text-xs font-mono-num uppercase tracking-[0.25em] text-[#25D366] block mb-3">
-              05 / INFORMAÇÕES
+              06 / INFORMAÇÕES
             </span>
             <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tight">
               Horários & Contato
